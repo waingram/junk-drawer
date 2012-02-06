@@ -1,0 +1,13 @@
+###
+### tomcat config for monit
+###
+check host tomcat with address luk.cites.illinois.edu
+    group ideals-dspace
+    stop program = "/services/ideals-dspace/bin/tomcat stop"
+    start program = "/services/ideals-dspace/bin/tomcat start" 
+if failed url http://luk.cites.illinois.edu:8080/ 
+    with timeout 5 seconds
+    then restart
+if 5 restarts within 5 cycles
+    then timeout
+    
