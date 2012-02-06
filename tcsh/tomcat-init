@@ -1,0 +1,153 @@
+#!/bin/tcsh
+###
+### Init script for Tomcat server
+###
+
+# Check the user
+set RUN_USER = "ideals-dspace"
+if ($USER != $RUN_USER) then
+    echo "Cannot run as user $USER"
+    exit 1
+endif
+
+setenv HOME /services/ideals-dspace
+
+#Base path of Tomcat 
+setenv CATALINA_HOME $HOME/tomcat 
+
+#Base path of Ant 
+setenv ANT_HOME $HOME/ant
+
+#Base path of JAVA JDK and JRE 
+setenv JAVA_HOME $HOME/java/jdk
+setenv JRE_HOME $JAVA_HOME/jre
+
+#Gives Tomcat access to Java SSL Libraries 
+setenv JSSE_HOME $JRE_HOME/lib 
+
+#Ensures Tomcat and DSpace have enough memory and use UTF-8 
+setenv CATALINA_OPTS "-server -Xms1024M -Xmx1024M -Dfile.encoding=UTF-8"
+
+setenv JAVA_OPTS "-Dhttps.protocols=SSLv3" 
+
+#For Monit, no path has been set
+if (! ${?PATH} ) set PATH = /bin:/usr/bin
+
+#Add Tomcat, Ant and Java 'bin' directories to PATH 
+setenv PATH $JRE_HOME/bin:$JAVA_HOME/bin:$CATALINA_HOME/bin:$HOME/bin:$PATH
+
+# Get Tomcat pid, if available
+set pid=`ps -ef|grep java|grep tomcat|cut -c10-14`
+
+set retval = 0
+
+switch ($1)
+    case "start":
+        echo -n "Starting Tomcat: "
+        
+        if ("$pid" != "") then
+            echo -n "Tomcat is already running. "
+            set retval = 1
+        else
+            $CATALINA_HOME/bin/startup.sh >> /dev/null
+            set retval = $?
+        endif
+
+        #echo 
+
+        if ($retval == 0) then
+            echo -n "OK"
+        else
+            echo -n "FAILED"
+        endif
+        echo
+        breaksw
+        
+    case "stop":
+        echo -n "Stopping Tomcat: "
+        if ("$pid" == "") then
+            echo -n "Tomcat is not running. "
+            set retval = 1
+        else
+            $CATALINA_HOME/bin/shutdown.sh >> /dev/null
+            sleep 2
+            set pid=`ps -ef|grep java|grep tomcat|cut -c10-14`
+            if ("$pid" != "") then
+                kill -9 $pid
+            endif
+            sleep 2
+ 
+            set retval = $?
+        endif
+        
+        #echo
+
+        if ($retval == 0) then
+            echo -n "OK"
+        else
+            echo -n "FAILED"
+        endif
+        echo
+        breaksw
+
+    case "status":
+        if ("$pid" == "" ) then
+            echo "Tomcat is stopped"
+        else
+            echo "Tomcat is running"
+        endif
+        exit 0
+        breaksw
+        
+    case "restart":
+        echo -n "Stopping Tomcat: "
+        if ("$pid" == "") then
+            echo -n "Tomcat is not running. "
+            set retval = 1
+        else
+            $CATALINA_HOME/bin/shutdown.sh >> /dev/null
+            sleep 2
+            set pid=`ps -ef|grep java|grep tomcat|cut -c10-14`
+            if ("$pid" != "") then
+                kill -9 $pid
+            endif
+            sleep 2
+            set retval = $?
+        endif
+
+        if ($retval == 0) then
+            echo -n "OK"
+        else
+            echo -n "FAILED"
+        endif
+        echo
+
+        echo -n "Starting Tomcat: "
+ 
+        set pid=`ps -ef|grep java|grep tomcat|cut -c10-14`       
+        if ("$pid" != "") then
+            echo -n "Tomcat is still running. "
+            set retval = 1
+        else
+            $CATALINA_HOME/bin/startup.sh >> /dev/null
+            set retval = $?
+        endif
+
+        #echo 
+
+        if ($retval == 0) then
+            echo -n "OK"
+        else
+            echo -n "FAILED"
+        endif
+        echo
+     
+        breaksw
+
+    default:
+        echo "Usage: tomcat {start|stop|restart|status}"
+        set retval = 2
+
+endsw
+
+exit $retval
