@@ -1,0 +1,47 @@
+--- pam_per_user-0.4/pam_per_user.c.typesfix	2005-09-11 18:20:39.000000000 -0500
++++ pam_per_user-0.4/pam_per_user.c	2006-01-24 14:10:54.000000000 -0600
+@@ -369,7 +369,7 @@
+ static void
+ copy_pam_item(pam_handle_t *from_pamh, pam_handle_t *to_pamh, int type)
+ {
+-	void *item;
++	const void *item;
+ 
+ #ifdef DEBUG
+ 	printf("=== copy_pam_item(from_pamh=0x%lx, to_pamh=0x%lx, type=%d)\n",
+@@ -491,7 +491,7 @@
+ 	if (*sub_pamh != NULL)
+ 	{
+ 		if (pam_get_item(*sub_pamh, PAM_SERVICE,
+-				 (void **)&old_service) != PAM_SUCCESS)
++				 (const void **)&old_service) != PAM_SUCCESS)
+ 		{
+ 			syslog(LOG_AUTHPRIV | LOG_WARNING,
+ 			       "pam_per_user: create_subrequest_handle(): "
+@@ -512,7 +512,7 @@
+ 	       "creating new subrequest (user=\"%s\", service=\"%s\")",
+ 	       user, service);
+ 
+-	if (pam_get_item(pamh, PAM_CONV, (void **)&conv) != PAM_SUCCESS)
++	if (pam_get_item(pamh, PAM_CONV, (const void **)&conv) != PAM_SUCCESS)
+ 	{
+ 		syslog(LOG_AUTHPRIV | LOG_ERR,
+ 		       "pam_per_user: create_subrequest_handle(): "
+@@ -555,7 +555,7 @@
+ 	/*
+ 	** get the user name
+ 	*/
+-	if (pam_get_user(pamh, &user, "login: ") != PAM_SUCCESS)
++	if (pam_get_user(pamh, (const char **)&user, "login: ") != PAM_SUCCESS)
+ 	{
+ 		syslog(LOG_AUTHPRIV | LOG_ERR,
+ 		       "pam_per_user: get_subrequest_handle(): "
+@@ -578,7 +578,7 @@
+ 		** username, we need to do another map lookup
+ 		*/
+ 		if (pam_get_item(*sub_pamh, PAM_USER,
+-				 (void **)&sub_user) != PAM_SUCCESS)
++				 (const void **)&sub_user) != PAM_SUCCESS)
+ 		{
+ 			syslog(LOG_AUTHPRIV | LOG_WARNING,
+ 			       "pam_per_user: get_subrequest_handle(): "
