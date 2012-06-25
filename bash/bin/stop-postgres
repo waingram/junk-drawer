@@ -1,0 +1,6 @@
+#!/bin/bash --login
+###
+### stop-postgres
+###
+
+/usr/bin/pg_ctl stop -m fast -D $HOME/pgsql/databases

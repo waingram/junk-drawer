@@ -1,0 +1,6 @@
+#!/bin/bash --login
+###
+### start-tomcat
+###
+
+$HOME/bin/tomcat start

@@ -1,0 +1,6 @@
+#!/bin/bash --login
+###
+### stop-tomcat
+###
+
+$HOME/bin/tomcat stop

@@ -1,0 +1,126 @@
+#!/bin/bash
+###
+### tomcat-init 
+###
+
+# Check the user
+RUN_USER="ideals-bibapp"
+if [ $USER != $RUN_USER ]; then
+   echo "Cannot run as user $USER"
+   exit 1
+fi
+
+HOME=/services/ideals-bibapp
+
+#Base path of Tomcat
+CATALINA_HOME=$HOME/tomcat
+
+#Base path of Ant
+ANT_HOME=$HOME/ant
+
+#Base path of JAVA JDK and JRE
+JAVA_HOME=$HOME/java/jdk
+JRE_HOME=$JAVA_HOME/jre
+
+#Gives Tomcat access to Java SSL Libraries
+JSSE_HOME=$JRE_HOME/lib
+
+#Ensures Tomcat and DSpace have enough memory and use UTF-8
+CATALINA_OPTS="-server -Xms1024M -Xmx1024M -Dfile.encoding=UTF-8"
+
+JAVA_OPTS="-Dhttps.protocols=SSLv3"
+
+#For Monit, no path has been set
+if [ -z $PATH ]; then 
+   PATH=/bin:/usr/bin
+fi
+
+#Add Tomcat, Ant and Java 'bin' directories to PATH
+PATH=$JRE_HOME/bin:$JAVA_HOME/bin:$CATALINA_HOME/bin:$HOME/bin:$PATH
+
+# Get Tomcat pid, if available
+pid=`ps -ef|grep java|grep tomcat|cut -c10-14`
+
+retval=0 
+
+start() {
+	echo -n $"Starting Tomcat: "
+	if [ $pid ]; then
+           echo -n "Tomcat is already running. "
+	   retval=1
+	else
+	   $CATALINA_HOME/bin/startup.sh >> /dev/null
+	   retval=$?
+	fi  
+	return $retval
+}
+stop() {
+       echo -n $"Stopping Tomcat: "
+       if [ $pid ]; then
+       	  $CATALINA_HOME/bin/shutdown.sh >> /dev/null
+	  sleep 2
+	  pid=`ps -ef|grep java|grep tomcat|cut -c10-14`
+	  if [ $pid ]; then
+	     kill -9 $pid
+	  fi
+	  sleep 2
+	  retval=$?
+       fi
+       return $retval
+}
+status() {
+     	 if [ $pid ]; then
+	    echo "Tomcat is running "
+	 else
+	    echo "Tomcat is stopped "
+	 fi
+	 retval=0
+	 return $retval
+}
+
+
+case "$1" in
+     start)
+	start 
+	if [ $retval -eq 0 ]; then 
+	   echo -n "OK"
+	else
+	   echo -n "FAILED"
+	fi
+	echo
+	;;
+     stop)
+	stop
+
+	if [ $retval -eq 0 ]; then 
+	   echo -n "OK"
+	else
+	   echo -n "FAILED"
+	fi
+	echo
+	;;
+     status)
+	status
+	;;
+     restart)
+	stop
+	if [ $retval -eq 0 ]; then 
+	   echo -n "OK"
+	else
+	   echo -n "FAILED"
+	fi
+	echo
+	start
+	if [ $retval -eq 0 ]; then 
+	   echo -n "OK"
+	else
+	   echo -n "FAILED"
+	fi
+	echo
+	;;
+     *)
+	echo $"Usage: tomcat-init {start|stop|restart|status}"
+	retval=2
+esac
+
+exit $retval

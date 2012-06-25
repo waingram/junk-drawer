@@ -1,0 +1,15 @@
+#!/bin/bash --login
+###
+### shutdown - service hook for shutting down  services; called by /etc/init.d/services_startup
+###
+
+# Stop Tomcat
+$HOME/bin/stop-tomcat
+
+# Stop PostgreSQL
+$HOME/bin/stop-postgres
+
+# Stop ClamAV daemon
+$HOME/bin/stop-clamd
+
+# Stop whatever

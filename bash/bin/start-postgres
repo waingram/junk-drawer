@@ -1,0 +1,6 @@
+#!/bin/bash --login
+###
+### start-postgres
+###
+
+/usr/bin/pg_ctl -D $HOME/pgsql/databases start

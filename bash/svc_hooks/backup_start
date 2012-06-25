@@ -1,0 +1,11 @@
+#!/bin/bash --login
+###
+### backup_start - service hook for shutting down  services; called by /etc/init.d/services_startup
+###
+
+DBNAME='bibapp_development'
+DATESTAMP=`date "+%Y%m%d"`
+
+# Dump the DB to a file
+#/usr/bin/pg_dump -E UNICODE ${DBNAME} > $HOME/pgsql/backup/pg_${DBNAME}_dump_${DATESTAMP}.sql
+

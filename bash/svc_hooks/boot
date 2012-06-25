@@ -1,0 +1,15 @@
+#!/bin/bash --login
+###
+### boot - service hook for booting up services; called by /etc/init.d/services_startup
+###
+
+# Start PostgreSQL
+$HOME/bin/start-postgres
+
+# Start Tomcat
+#$HOME/bin/start-tomcat
+
+# Start ClamAV daemon
+#$HOME/bin/start-clamd
+
+# Start whatever
